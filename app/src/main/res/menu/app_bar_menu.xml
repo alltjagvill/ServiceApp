@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <item
+        android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@mipmap/baseline_search_white_18dp"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_adds"
+        android:title="Adds"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_nearby"
+        android:title="Services nearby"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="Settings"
+        app:showAsAction="never"/>
+
+
+
+</menu>

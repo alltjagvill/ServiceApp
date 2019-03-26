@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ServiceApp</string>
+    <string name="login_name_hint">Username...</string>
+    <string name="login_password_hint">Password...</string>
+    <string name="login">Login!</string>
+    <string name="register">Register!</string>
+    <string name="title_activity_maps">Map</string>
+
+</resources>

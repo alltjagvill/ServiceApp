@@ -1,9 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    android:background="@drawable/gradient_background"
+    android:orientation="vertical"    >
 
-</android.support.constraint.ConstraintLayout>
+
+    <EditText
+        android:id="@+id/registerEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:background="@drawable/rectangle"
+        android:hint="@string/login_name_hint"
+        android:elevation="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="85dp"
+        android:ems="10"
+        android:inputType="textEmailAddress" />
+
+    <EditText
+        android:id="@+id/registerPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/rectangle"
+        android:hint="@string/login_password_hint"
+        android:elevation="10dp"
+        android:layout_below="@id/registerEmail"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <EditText
+        android:id="@+id/registerConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/rectangle"
+        android:hint="@string/login_confirm_password_hint"
+        android:elevation="10dp"
+        android:layout_below="@id/registerPassword"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+
+
+
+
+    <Button
+        android:id="@+id/registerButtonCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        android:background="@drawable/button_state"
+        android:text="@string/cancel"
+        android:onClick="cancelRegister"/>
+
+    <Button
+        android:id="@+id/registerButtonConfirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+
+        android:background="@drawable/button_state"
+        android:layout_above="@+id/registerButtonCancel"
+        android:layout_marginBottom="20dp"
+        android:onClick="registerSubmit"
+        android:text="@string/register" />
+
+
+</RelativeLayout>

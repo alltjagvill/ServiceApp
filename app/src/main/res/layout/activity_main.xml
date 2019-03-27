@@ -18,7 +18,7 @@
         app:srcCompat="@drawable/circle" />
 
     <EditText
-        android:id="@+id/loginName"
+        android:id="@+id/loginEmail"
         android:layout_width="match_parent"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
@@ -29,7 +29,7 @@
         android:layout_marginTop="250dp"
         android:ems="10"
         android:background="@drawable/rectangle"
-        android:inputType="textPersonName"
+        android:inputType="textEmailAddress"
         android:hint="@string/login_name_hint"
         android:elevation="10dp"/>
 
@@ -43,7 +43,7 @@
         android:layout_marginTop="20dp"
         android:background="@drawable/rectangle"
         android:ems="10"
-        android:layout_below="@id/loginName"
+        android:layout_below="@id/loginEmail"
         android:hint="@string/login_password_hint"
         android:inputType="textPassword"
         android:elevation="10dp"
@@ -52,14 +52,15 @@
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
-        android:layout_marginLeft="80dp"
-        android:layout_marginRight="80dp"
         android:layout_height="wrap_content"
-        android:layout_above="@id/registerButton"
+        android:layout_below="@id/loginPassword"
         android:layout_centerHorizontal="true"
+        android:layout_marginLeft="80dp"
         android:layout_marginTop="20dp"
+        android:layout_marginRight="80dp"
+        android:layout_marginBottom="64dp"
         android:background="@drawable/button_state"
-        android:onClick="startLogin"
+        android:onClick="submit"
         android:text="@string/login" />
 
     <Button

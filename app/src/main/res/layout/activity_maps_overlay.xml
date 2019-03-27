@@ -9,7 +9,11 @@
 
 
     <include
-        layout="@layout/toolbar_layout"/>
+
+        layout="@layout/activity_maps"/>
+
+    <include
+        layout="@layout/toolbar_layout" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -20,12 +24,5 @@
         app:itemBackground="@color/colorPrimary"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="TextView" />
 
 </RelativeLayout>

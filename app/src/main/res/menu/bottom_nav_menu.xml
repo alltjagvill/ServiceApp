@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_ads"
+        android:enabled="true"
+        android:icon="@mipmap/shopping_cart"
+        android:title="@string/ads"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_maps"
+        android:enabled="true"
+        android:icon="@mipmap/location_on"
+        android:title="@string/nearby_ads"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_messages"
+        android:enabled="true"
+        android:icon="@mipmap/message"
+        android:title="@string/messages"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_myads"
+        android:enabled="true"
+        android:icon="@mipmap/add_shopping_cart"
+        android:title="@string/your_ads"
+        app:showAsAction="ifRoom" />
+</menu>

@@ -40,7 +40,11 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".Main2Activity" />
+        <activity android:name=".MapsOverlayActivity" />
+        <activity android:name=".MyAdsActivity" />
+        <activity android:name=".MessagesActivity"></activity>
     </application>
 
 </manifest>

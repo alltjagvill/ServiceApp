@@ -10,19 +10,17 @@
         android:icon="@mipmap/baseline_search_white_18dp"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/action_adds"
-        android:title="Adds"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_nearby"
-        android:title="Services nearby"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/action_settings"
-        android:title="Settings"
+        android:title="@string/settings"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/logout"
+        app:showAsAction="never"
+        />
+
+
 
 
 

@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,6 +18,7 @@ public class MyAdsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     FirebaseAuth auth;
+    float x1, x2, y1, y2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,5 +102,24 @@ public class MyAdsActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    public boolean onTouchEvent(MotionEvent touchevent) {
+        switch (touchevent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                x1 = touchevent.getX();
+                y1 = touchevent.getX();
+                break;
+
+            case MotionEvent.ACTION_UP:
+                x2 = touchevent.getX();
+                y2 = touchevent.getY();
+                if (x1 < x2) {
+                    Intent nearbyAds = new Intent(MyAdsActivity.this, MessagesActivity.class);
+                    startActivity(nearbyAds);
+                }
+                break;
+        }
+        return false;
     }
 }

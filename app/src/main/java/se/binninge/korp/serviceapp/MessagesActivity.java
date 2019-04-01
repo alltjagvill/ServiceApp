@@ -119,7 +119,7 @@ public class MessagesActivity extends AppCompatActivity {
                 else if (x1 < x2) {
                 Intent nearbyAds = new Intent(MessagesActivity.this, MapsActivity.class);
                 startActivity(nearbyAds);
-                
+
             }
                 break;
         }

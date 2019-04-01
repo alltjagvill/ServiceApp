@@ -5,14 +5,23 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.widget.Adapter;
 import android.widget.Toast;
+import Adapter.AdsAdapter;
 
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import Model.Ads;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -21,6 +30,9 @@ public class HomeActivity extends AppCompatActivity {
     FirebaseAuth auth;
     float x1, x2, y1, y2;
 
+    private List<Ads> adsList;
+    private RecyclerView adsRecyclerView;
+    private RecyclerView.Adapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +44,26 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.action_ads);
         setSupportActionBar(toolbar);
 
+        adsRecyclerView = findViewById(R.id.adsRecyclerViewID);
+        adsRecyclerView.setHasFixedSize(true);
+        adsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
+        Ads ad1 = new Ads("Haircutting", "I'm cutting hair. Cheap.", "Korp", 300);
+
+        adsList = new ArrayList<>();
+
+        adsList.add(ad1);
+        adapter = new AdsAdapter(this, adsList);
+        adsRecyclerView.setAdapter(adapter);
+
+        for (int i = 0; i < 10; i++) {
+            Ads ad3 = new Ads("Test" + (i+1), "Testing this out", "Korp", 100) {
+
+            };
+
+            adsList.add(ad3);
+        }
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

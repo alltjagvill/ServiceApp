@@ -4,20 +4,33 @@ public class Ads {
 
     private String title;
     private String description;
-    private String user;
+    private String userID;
+    private String firstName;
+    private String lastName;
+    private Double price;
+
+    // private String id;
     //private String category;
-    private double price;
     /*private double latitude;
     private double langitude;
     private double customerRating;
     private double sellerRating;*/
 
-    public Ads(String title, String description, String user, double price) {
+   /* public void setId(String id) {
+        this.id = id;
+    }*/
+    public Ads() {
+
+    }
+    public Ads(String title, String description, String userID, String firstName, String lastName, Double price) {
         this.title = title;
         this.description = description;
-        this.user = user;
-      //  this.category = category;
+        this.userID = userID;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.price = price;
+     //   this.category = category;
+
     }
 
 
@@ -25,22 +38,22 @@ public class Ads {
     public String getTitle() {
         return title;
     }
-
     public String getDescription() {
         return description;
     }
-
-    public String getUser() {
-        return user;
+    public String getFirstName() {
+        return firstName;
     }
-
-    public double getPrice() {
-        return price;
+    public String getLastName() {
+        return lastName;
+    }
+    public String getUserID() {return userID;}
+    public Double getPrice() { return price;
     }
 
     //Setters
 
-    public void setTitle(String title) {
+    /*public void setTitle(String title) {
         this.title = title;
     }
 
@@ -50,9 +63,9 @@ public class Ads {
 
     public void setUser(String user) {
         this.user = user;
-    }
+    }*/
 
-    public void setPrice(double price) {
+    /*public void setPrice(double price) {
         this.price = price;
-    }
+    }*/
 }

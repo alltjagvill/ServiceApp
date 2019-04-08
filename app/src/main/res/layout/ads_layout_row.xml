@@ -30,9 +30,9 @@
                 android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/description"
+                android:id="@+id/price"
                 android:layout_weight="1"
-                android:text="Description"
+                android:text="Price"
                 android:paddingTop="5dp"
                 android:paddingLeft="14dp"
                 android:layout_width="wrap_content"

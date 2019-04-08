@@ -3,6 +3,9 @@ package Adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +21,7 @@ public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
 
     private Context context;
     private List<Ads> adsList;
+
 
     public AdsAdapter(Context context, List adsList) {
         this.context = context;
@@ -37,9 +41,12 @@ public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
 
         Ads ad = adsList.get(i);
 
+        String userName = ad.getFirstName() + " " + ad.getLastName();
+        String adPrice = Double.toString(ad.getPrice())  ;
+
         viewHolder.title1.setText(ad.getTitle());
-        viewHolder.description1.setText(ad.getDescription());
-        viewHolder.user1.setText(ad.getUser());
+        viewHolder.price.setText(adPrice);
+        viewHolder.user1.setText(userName);
     }
 
     @Override
@@ -49,7 +56,7 @@ public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView title1;
-        public  TextView description1;
+        public  TextView price;
         public TextView user1;
 
         public ViewHolder(@NonNull View adsView) {
@@ -58,7 +65,7 @@ public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
             adsView.setOnClickListener(this);
 
             title1 = adsView.findViewById(R.id.title);
-            description1 = adsView.findViewById(R.id.description);
+            price = adsView.findViewById(R.id.price);
             user1 = adsView.findViewById(R.id.user);
         }
 

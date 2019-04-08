@@ -6,18 +6,24 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MyAdsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     FirebaseAuth auth;
+    FirebaseFirestore db;
+    CollectionReference myAds;
     float x1, x2, y1, y2;
 
     @Override
@@ -30,6 +36,18 @@ public class MyAdsActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.action_myads);
         setSupportActionBar(toolbar);
+
+
+
+
+        String userID = auth.getUid();
+
+        String currentUser = auth.getCurrentUser().toString();
+
+        Log.d("!!!", userID);
+        Log.d("!!!", currentUser);
+
+
 
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -121,5 +139,13 @@ public class MyAdsActivity extends AppCompatActivity {
                 break;
         }
         return false;
+    }
+
+    public void addAd(View view) {
+        Intent intent = new Intent(this, AdAdvertismentActivity.class);
+
+        startActivity(intent);
+
+
     }
 }

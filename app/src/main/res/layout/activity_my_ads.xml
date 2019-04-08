@@ -15,6 +15,20 @@
         android:layout_marginTop="254dp"
         android:text="MY ADS" />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/add_circle_36dp"
+        android:layout_margin="16dp"
+        android:layout_above="@+id/bottom_navigation"
+        android:onClick="addAd"
+        android:padding="0dp"
+        android:scaleType="fitXY"/>
+
+
 
 
     <android.support.design.widget.BottomNavigationView

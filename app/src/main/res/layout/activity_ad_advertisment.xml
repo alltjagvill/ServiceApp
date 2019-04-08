@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:orientation="vertical"    >
+
+
+    <EditText
+        android:id="@+id/addAdTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginRight="200dp"
+        android:background="@drawable/rectangle"
+        android:elevation="10dp"
+        android:ems="10"
+        android:hint="@string/title_hint"
+        android:inputType="text" />
+    <EditText
+        android:id="@+id/adAddDescription"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/rectangle"
+        android:hint="@string/description_hint"
+        android:elevation="10dp"
+        android:layout_below="@id/addAdTitle"
+        android:ems="10"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/adAddPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="250dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/rectangle"
+        android:hint="@string/price_hint"
+        android:elevation="10dp"
+        android:layout_below="@id/adAddDescription"
+        android:ems="10"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/createAd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/addAdTitle"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:text="Create ad"
+        android:onClick="createAd"/>
+
+    <Button
+        android:id="@+id/cancelAdCreation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/createAd"
+        android:layout_toEndOf="@+id/addAdTitle"
+        android:text="Canel"
+        android:onClick="cancelCreateAdd"/>
+
+
+</RelativeLayout>

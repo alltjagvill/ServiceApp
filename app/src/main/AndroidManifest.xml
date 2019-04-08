@@ -44,7 +44,8 @@
         <activity android:name=".Main2Activity" />
         <activity android:name=".MapsOverlayActivity" />
         <activity android:name=".MyAdsActivity" />
-        <activity android:name=".MessagesActivity"></activity>
+        <activity android:name=".MessagesActivity" />
+        <activity android:name=".AdAdvertismentActivity"></activity>
     </application>
 
 </manifest>

@@ -42,7 +42,7 @@ public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
         Ads ad = adsList.get(i);
 
         String userName = ad.getFirstName() + " " + ad.getLastName();
-        String adPrice = Double.toString(ad.getPrice())  ;
+        String adPrice = Double.toString(ad.getPrice());
 
         viewHolder.title1.setText(ad.getTitle());
         viewHolder.price.setText(adPrice);

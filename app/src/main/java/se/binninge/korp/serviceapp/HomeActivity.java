@@ -68,6 +68,20 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.action_ads);
         setSupportActionBar(toolbar);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //Setting up Recycler view
         adsRecyclerView = findViewById(R.id.adsRecyclerViewID);
         adsRecyclerView.setHasFixedSize(true);
@@ -99,6 +113,15 @@ public class HomeActivity extends AppCompatActivity {
 
         adapter = new AdsAdapter(this, adsList);
         adsRecyclerView.setAdapter(adapter);
+
+
+
+
+
+
+
+
+
 
         /* adsRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override

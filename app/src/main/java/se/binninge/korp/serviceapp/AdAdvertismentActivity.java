@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,8 @@ public class AdAdvertismentActivity extends AppCompatActivity {
     private TextView adAddDescriptionTextView;
     private TextView adAddPriceTextView;
 
+    private Button adButton;
+
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private CollectionReference ads;
@@ -38,6 +41,8 @@ public class AdAdvertismentActivity extends AppCompatActivity {
     private String firstName;
     private String lastName;
     private Double price;
+    private String priceText;
+
 
 
     @Override
@@ -53,64 +58,75 @@ public class AdAdvertismentActivity extends AppCompatActivity {
         user = db.collection("users");
         userDoc = user.document(userID);
 
-        Log.d("!!!", userID);
-        Log.d("!!!", user.toString());
-        Log.d("!!!", userDoc.toString());
-
-
-
+        adButton = findViewById(R.id.createAd);
 
         adAddTitleTextView = findViewById(R.id.addAdTitle);
         adAddDescriptionTextView = findViewById(R.id.adAddDescription);
         adAddPriceTextView = findViewById(R.id.adAddPrice);
-
-
-
-    }
+        }
 
 
     public void createAd(View view) {
 
         title = adAddTitleTextView.getText().toString();
         description = adAddDescriptionTextView.getText().toString();
-        //String priceText = adAddPriceTextView.getText().toString();
-        price = Double.parseDouble(adAddPriceTextView.getText().toString());
+        priceText = adAddPriceTextView.getText().toString();
 
-        userDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
+        if (title.equals("") || description.equals("") || priceText.equals("")) {
 
-                if (documentSnapshot.exists()) {
-                    firstName = documentSnapshot.getString("firstname");
-                    lastName = documentSnapshot.getString("lastname");
-                    Log.d("!!!", firstName);
-                    Log.d("!!!", lastName);
-                } else {
-                    Toast.makeText(AdAdvertismentActivity.this, getString(R.string.document_not_exists), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.field_empty), Toast.LENGTH_SHORT).show();
+
+        } else {
+
+            userDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                    if (documentSnapshot.exists()) {
+
+                        price = Double.parseDouble(adAddPriceTextView.getText().toString());
+                        adButton.setEnabled(false);
+
+                        firstName = documentSnapshot.getString("firstName");
+                        lastName = documentSnapshot.getString("lastName");
+
+                        Map<String, Object> createAd = new HashMap<>();
+                        createAd.put("title", title);
+                        createAd.put("description", description);
+                        createAd.put("firstName", firstName);
+                        createAd.put("lastName", lastName);
+                        createAd.put("price", price);
+                        createAd.put("userID", userID);
+
+                        ads.add(createAd);
+
+
+
+                    } else {
+                        Toast.makeText(AdAdvertismentActivity.this, getString(R.string.document_not_exists), Toast.LENGTH_SHORT).show();
+                    }
+
                 }
-            }
+
+
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                }
+            });
 
 
 
 
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-            }
-        });
-
-        Map<String,  Object> createAd = new HashMap<>();
-        createAd.put("title", title);
-        createAd.put("description", description);
-        createAd.put("firstName", firstName);
-        createAd.put("lastName", lastName);
-        createAd.put("price", price);
-
-        
+                Intent intent = new Intent(this, MyAdsActivity.class);
 
 
-    }
+                startActivity(intent);
+
+
+        }
+        }
 
 
     public void cancelCreateAdd(View view) {

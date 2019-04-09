@@ -46,7 +46,7 @@
         android:elevation="10dp"
         android:layout_below="@id/adAddDescription"
         android:ems="10"
-        android:inputType="text" />
+        android:inputType="number" />
 
     <Button
         android:id="@+id/createAd"
@@ -63,9 +63,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/createAd"
-        android:layout_toEndOf="@+id/addAdTitle"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="20dp"
         android:text="Canel"
-        android:onClick="cancelCreateAdd"/>
+        android:onClick="cancelCreateAdd"
+        />
 
 
 </RelativeLayout>

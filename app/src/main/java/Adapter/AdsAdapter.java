@@ -1,20 +1,17 @@
 package Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.List;
-
 import Model.Ads;
+import se.binninge.korp.serviceapp.LookAtAdActivity;
 import se.binninge.korp.serviceapp.R;
 
 public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
@@ -73,12 +70,16 @@ public class AdsAdapter extends RecyclerView.Adapter<AdsAdapter.ViewHolder> {
         public void onClick(View v) {
             int position = getAdapterPosition();
 
-            Ads ad = adsList.get(position);
+            Ads ad = (Ads) adsList.get(position);
+
+            Intent intent = new Intent(context, LookAtAdActivity.class);
+
+            intent.putExtra("ADOBJECT", ad);
+
+            context.startActivity(intent);
 
             Toast.makeText(context, ad.getTitle(), Toast.LENGTH_LONG).show();
         }
-        /*public TextView category1;
-        public  TextView price1;*/
 
     }
 }

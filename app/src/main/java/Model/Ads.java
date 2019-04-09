@@ -1,6 +1,8 @@
 package Model;
 
-public class Ads {
+import java.io.Serializable;
+
+public class Ads implements Serializable {
 
     private String title;
     private String description;

@@ -49,12 +49,5 @@ public class LookAtAdActivity extends AppCompatActivity {
         priceTV.setText(price.toString());
 
 
-        Log.d("!!!", title);
-        Log.d("!!!", description);
-        Log.d("!!!", firstName);
-        Log.d("!!!", lastName);
-        Log.d("!!!", userID);
-        Log.d("!!!", price.toString());
-
     }
 }

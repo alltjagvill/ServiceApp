@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -14,17 +16,41 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import Adapter.AdsAdapter;
+import Model.Ads;
 
 public class MyAdsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
-    FirebaseAuth auth;
-    FirebaseFirestore db;
-    CollectionReference myAds;
-    float x1, x2, y1, y2;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private CollectionReference myAdsRef;
+    private CollectionReference userColRef;
+    private DocumentReference userDocRef;
+    private String userID;
+    private String currentUser;
+    private float x1, x2, y1, y2;
+    private List<Ads> myAdsList;
+    private List<Ads> tempList;
+    RecyclerView myAdsRecyclerView;
+    private RecyclerView.Adapter myAdsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,20 +58,79 @@ public class MyAdsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_ads);
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        myAdsRef = db.collection("ads");
+        userColRef = db.collection("users");
+
+
+
         toolbar = findViewById(R.id.toolBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.action_myads);
         setSupportActionBar(toolbar);
 
+        userID = auth.getUid();
+        userDocRef = userColRef.document(userID);
+
+        //Set title
+        userDocRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                if (documentSnapshot.exists()) {
+
+                    String firstName = documentSnapshot.getString("firstName");
+                    String lastName = documentSnapshot.getString("lastName");
+                    String userName = firstName + " " + lastName;
+                    setTitle(getString(R.string.your_ads) + " - " + userName);
+                    Log.d("!!!!!", userName);
+
+                } else {
+                    Toast.makeText(MyAdsActivity.this, getString(R.string.document_not_exists), Toast.LENGTH_SHORT).show();
+                }    }
+
+
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+        //END Set title
+
+        myAdsRecyclerView = findViewById(R.id.myAdsRecyclerViewID);
+        myAdsRecyclerView.setHasFixedSize(true);
+        myAdsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        tempList = new ArrayList<>();
+        myAdsList = new ArrayList<>();
 
 
 
-        String userID = auth.getUid();
+        Query query = myAdsRef.whereEqualTo("userID", userID);
+        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
-        String currentUser = auth.getCurrentUser().toString();
+                myAdsList.clear();
 
-        Log.d("!!!", userID);
-        Log.d("!!!", currentUser);
+                for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
+
+
+
+                    Ads ad = snapshot.toObject(Ads.class);
+                    myAdsList.add(ad);
+
+
+                }
+
+                myAdsAdapter.notifyDataSetChanged();
+            }
+        });
+
+        myAdsAdapter = new AdsAdapter(this, myAdsList);
+        myAdsRecyclerView.setAdapter(myAdsAdapter);
+
 
 
 

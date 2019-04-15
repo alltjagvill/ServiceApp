@@ -46,7 +46,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.action_maps);
         setSupportActionBar(toolbar);
-
+        setTitle(getString(R.string.nearby_ads));
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

@@ -1,16 +1,23 @@
 <resources>
     <string name="app_name">ServiceApp</string>
-    <string name="login_name_hint">Email...</string>
-    <string name="login_password_hint">Password...</string>
+
 
     <string name="login">Login!</string>
     <string name="register">Register!</string>
     <string name="title_activity_maps">Map</string>
     <string name="cancel">Cancel!</string>
     <string name="currency"> $</string>
+    <string name="create">Create!</string>
+
+
+
+    <!-- Hints -->
+
+    <string name="login_name_hint">Email...</string>
+    <string name="login_password_hint">Password...</string>
     <string name="title_hint">Title...</string>
     <string name="description_hint">Description...</string>
-    <string name="price_hint">300...</string>
+    <string name="price_hint">Price...</string>
 
 
     <!-- Register -->
@@ -40,6 +47,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="create_ad">Create ad</string>
 
 
     <!-- Logs -->

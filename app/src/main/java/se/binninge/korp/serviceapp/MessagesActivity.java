@@ -30,6 +30,7 @@ public class MessagesActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.action_messages);
         setSupportActionBar(toolbar);
 
+        setTitle(getString(R.string.messages));
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

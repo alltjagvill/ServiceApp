@@ -1,8 +1,17 @@
 package se.binninge.korp.serviceapp;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,23 +26,35 @@ import android.widget.Adapter;
 import android.widget.Toast;
 import Adapter.AdsAdapter;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
+
+
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import Model.Ads;
+import Model.User;
+import Utilites.CalcGeoPoints;
 
 public class HomeActivity extends AppCompatActivity {
     FirebaseAuth auth;
@@ -43,6 +64,17 @@ public class HomeActivity extends AppCompatActivity {
     private List<Ads> adsList;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
+
+
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private Double userLat;
+    private Double userLong;
+    private LatLng userLatLng;
+
+    private User user;
+
+
 
     float x1, x2, y1, y2;
 
@@ -62,22 +94,17 @@ public class HomeActivity extends AppCompatActivity {
         userId = auth.getUid();
         adsRef = db.collection("ads");
 
+
+
+
         //Setting up toolbars
         toolbar = findViewById(R.id.toolBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.action_ads);
         setSupportActionBar(toolbar);
 
-
-
-
-
-
-
-
-
-
-
+       //Setting title
+        setTitle(getString(R.string.ads));
 
 
 
@@ -89,27 +116,122 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+        // Setting up location listener and updating Geo location
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        Double createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+        Double createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+        //Creating user
+        user = new User(createUserLat, createUserLon);
+
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                Log.d("Location", location.toString());
+                final GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+                userLat = location.getLatitude();
+                userLong = location.getLongitude();
+                userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                user.setLat(userLat);
+                user.setLon(userLong);
+
+                Log.d("UserLocation lat: ", Double.toString(userLat));
+                Log.d("UserLocation long: ", Double.toString(userLong));
+                //String userLocationString = userLocation.toString();
+                Log.d("Userlocation", userLocation.toString());
+
+               // Query queryGpsUpdate = adsRef.whereEqualTo("userID", userId);
+
+                adsRef.whereEqualTo("userID", userId).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+
+                                 Map<Object, Double> userGeoLat = new HashMap<>();
+                                userGeoLat.put("userLat", userLat);
+                                adsRef.document(document.getId()).set(userGeoLat, SetOptions.merge());
+
+                                Map<Object, Double> userGeoLon = new HashMap<>();
+                                userGeoLon.put("userLon", userLong);
+                                adsRef.document(document.getId()).set(userGeoLon, SetOptions.merge());
+                                Log.d("!!!", userId);
+                            }
+                            } else {
+                            Log.d("!!!", "No response");
+                        }
+                        }
+                });
+            }
+            // Setting up location listener and updating Geo location
+
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+
 
         adsList = new ArrayList<>();
-       adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-           @Override
-           public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-          adsList.clear();
+        adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                adsList.clear();
 
-          for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
-              Ads ad = snapshot.toObject(Ads.class);
-              adsList.add(ad);
-          }
-               Log.d("!!!","size:" + adsList.size());
+                CalcGeoPoints calcGeoPoints = new CalcGeoPoints();
+                for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
 
-               for(Ads ad : adsList) {
-                   Log.d("!!!", "User: " + ad.getFirstName() + " " + ad.getLastName());
-                   Log.d("!!!", "Title: " + ad.getTitle());
-                   Log.d("!!!","Description" + ad.getDescription() );
-               }
-               adapter.notifyDataSetChanged();
-           }
-       });
+                    try {
+                        Ads ad = snapshot.toObject(Ads.class);
+
+                        Double adLat = ad.getUserLat();
+                        Double adLong = ad.getUserLon();
+                        Double userLat = user.getLat();
+                        Double userLon = user.getLon();
+
+                        Log.d("!!!!!TheAd", ad.getTitle());
+                        Log.d("!!!!!AdName", ad.getFirstName() + " " + ad.getLastName());
+                        Log.d("!!!!!adLocation lat", Double.toString(adLat));
+                        Log.d("!!!!!adLocation long", Double.toString(adLong));
+                        Log.d("!!!!!userLocation lat", user.getLat().toString());
+                        Log.d("!!!!!userLocation long", user.getLon().toString());
+
+
+
+                    float geoCalc = calcGeoPoints.withinDistance(userLat, userLon, adLat, adLong);
+                    Log.d("!!!!!GEOCALC", Float.toString(geoCalc));
+
+
+                        //Log.d("geoLocation", Double.toString(ad.getUserGeo().getLatitude()));
+
+                         if ( geoCalc < 100000) {
+                        adsList.add(ad);
+
+                        }
+                    } catch (NullPointerException e1) {
+                        Log.d("NULLPOINT", e1.toString());
+                    }
+                    }
+
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         adapter = new AdsAdapter(this, adsList);
         adsRecyclerView.setAdapter(adapter);
@@ -119,55 +241,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-
-
-
-
-        /* adsRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                    adsList = new ArrayList<>();
-                    Ads ad = documentSnapshot.toObject(Ads.class);
-
-                    adsList.add(ad);
-                }
-            }
-        });*/
-
-
-
-        /*adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-
-                for (queryDocumentSnapshots doc)
-                adsList = new ArrayList<>();
-
-
-                adapter.notifyDataSetChanged();
-
-
-            }
-        });*/
-
-        /*Ads ad1 = new Ads("Haircutting", "I'm cutting hair. Cheap.", "Korp", 300);
-
-        adsList = new ArrayList<>();
-
-        adsList.add(ad1);*/
-
-
-
-
-        /*for (int i = 0; i < 10; i++) {
-            Ads ad3 = new Ads("Test" + (i+1), "Testing this out", "Korp", 100) {
-
-            };
-
-            adsList.add(ad3);
-        }*/
 
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -200,7 +273,29 @@ public class HomeActivity extends AppCompatActivity {
         });
 
 
+        //Checking location permission
+
+        if (Build.VERSION.SDK_INT < 23)  {
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //Ask for it
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } else {
+                //we have permission
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+            }
+        }
+
     }
+
+
+
+
+
+    //Methods
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -210,6 +305,20 @@ public class HomeActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.app_bar_menu, menu);
 
         return true;
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            }
+        }
     }
 
     @Override

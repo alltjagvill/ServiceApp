@@ -71,6 +71,8 @@ public class HomeActivity extends AppCompatActivity {
     private Double userLat;
     private Double userLong;
     private LatLng userLatLng;
+    private Double createUserLat;
+    private Double createUserLon;
 
     private User user;
 
@@ -118,8 +120,25 @@ public class HomeActivity extends AppCompatActivity {
 
         // Setting up location listener and updating Geo location
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        Double createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
-        Double createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+        if (Build.VERSION.SDK_INT < 23)  {
+
+            createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+            createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //Ask for it
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } else {
+                //we have permission
+                createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+                createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+            }
+        }
+
 
         //Creating user
         user = new User(createUserLat, createUserLon);

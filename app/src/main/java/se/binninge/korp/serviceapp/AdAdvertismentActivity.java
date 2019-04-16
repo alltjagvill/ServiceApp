@@ -98,8 +98,25 @@ public class AdAdvertismentActivity extends AppCompatActivity {
         adAddUsernameTextview = findViewById(R.id.adAddUsername);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        userLocationGeoLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
-        getUserLocationGeoLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+        if (Build.VERSION.SDK_INT < 23)  {
+
+            userLocationGeoLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+            getUserLocationGeoLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //Ask for it
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } else {
+                //we have permission
+                userLocationGeoLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+                getUserLocationGeoLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+            }
+        }
+
 
 
         userDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -283,5 +300,19 @@ public class AdAdvertismentActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==PackageManager.PERMISSION_GRANTED) {
+                userLocationGeoLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+                getUserLocationGeoLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+            }
+        }
     }
 }

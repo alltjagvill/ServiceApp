@@ -57,10 +57,10 @@ import Model.User;
 import Utilites.CalcGeoPoints;
 
 public class HomeActivity extends AppCompatActivity {
-    FirebaseAuth auth;
-    FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
     private String userId;
-    CollectionReference adsRef;
+    private CollectionReference adsRef;
     private List<Ads> adsList;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;

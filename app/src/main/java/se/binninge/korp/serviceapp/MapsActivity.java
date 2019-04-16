@@ -1,9 +1,13 @@
 package se.binninge.korp.serviceapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -13,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatCallback;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,16 +28,41 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import Model.Ads;
+import Model.User;
+import Utilites.CalcGeoPoints;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
-    FirebaseAuth auth;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private CollectionReference adsRef;
+    private List<Ads> adsList;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+
+    private Double mapUserLat;
+    private Double mapUserLon;
+    private User user;
 
 
 
@@ -46,11 +76,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        adsRef = db.collection("ads");
+
         toolbar = findViewById(R.id.toolBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.action_maps);
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.nearby_ads));
+
+
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -96,10 +131,140 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                mMap.clear();
+                // Add a marker for user location
+                LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(userLatLng).title("You are here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLatLng.latitude, userLatLng.longitude)));
+
+                mapUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+                mapUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+                Log.d("CURRENTLOCATION", userLatLng.toString());
+               // mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+
+                Log.d("CURRENTLOCATION", userLatLng.toString());
+
+                adsList = new ArrayList<>();
+                adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        adsList.clear();
+
+                        int adPosition = 0;
+                        CalcGeoPoints calcGeoPoints = new CalcGeoPoints();
+                        for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
+
+                            try {
+                                Ads ad = snapshot.toObject(Ads.class);
+
+                                Double adLat = ad.getUserLat();
+                                Double adLong = ad.getUserLon();
+                                Double userLat = user.getLat();
+                                Double userLon = user.getLon();
+
+                                Log.d("!!!!!TheAd", ad.getTitle());
+                                Log.d("!!!!!AdName", ad.getFirstName() + " " + ad.getLastName());
+                                Log.d("!!!!!adLocation lat", Double.toString(adLat));
+                                Log.d("!!!!!adLocation long", Double.toString(adLong));
+                                Log.d("!!!!!userLocation lat", user.getLat().toString());
+                                Log.d("!!!!!userLocation long", user.getLon().toString());
+
+
+
+                                float geoCalc = calcGeoPoints.withinDistance(userLat, userLon, adLat, adLong);
+                                Log.d("!!!!!GEOCALC", Float.toString(geoCalc));
+
+
+
+                                //Log.d("geoLocation", Double.toString(ad.getUserGeo().getLatitude()));
+
+                                if ( geoCalc < 100000) {
+                                    adsList.add(ad);
+
+
+                                    LatLng adLatLng = new LatLng(ad.getUserLat(), ad.getUserLon());
+                                    mMap.addMarker(new MarkerOptions().position(adLatLng).title(ad.getTitle()).snippet(Integer.toString(adPosition)));
+                                    //MarkerOptions marker = new MarkerOptions().position(ad.getUserLat(), ad.getUserLon())
+                                    adPosition = adPosition +1;
+
+                                }
+                            } catch (NullPointerException e1) {
+                                Log.d("NULLPOINT", e1.toString());
+                            }
+                        }
+
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        //Checking location permission
+
+        if (Build.VERSION.SDK_INT < 23)  {
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //Ask for it
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } else {
+                //we have permission
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
+
+
+                Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                mapUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+                mapUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+                mMap.clear();
+                // Add a marker for user location
+                LatLng userLatLng1 = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(userLatLng1).title("You are here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLatLng1.latitude, userLatLng1.longitude), 10));
+                Log.d("Lastknown", userLatLng1.toString());
+             //  mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                Log.d("Lastknown", userLatLng1.toString());
+
+            }
+        }
+        //Creating user
+        user = new User(mapUserLat, mapUserLon);
+
+
+
+
+        /*for (int i = 0; i < adsList.size(); i++) {
+
+            Ads newAd = adsList[i];
+
+
+        }
+*/
+
     }
 
 
@@ -145,7 +310,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+                }
+            }
+        }
+
+    }
 
 
 }

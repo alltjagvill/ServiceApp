@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -51,6 +52,8 @@ public class AdAdvertismentActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
     private CollectionReference ads;
     private CollectionReference user;
     private DocumentReference userDoc;
@@ -63,6 +66,8 @@ public class AdAdvertismentActivity extends AppCompatActivity {
     private Double price;
     private String priceText;
     private String userName;
+    private String userEmail;
+
 
     private LocationManager locationManager;
 
@@ -85,6 +90,13 @@ public class AdAdvertismentActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         userID = auth.getUid();
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        try {
+            userEmail = firebaseUser.getEmail();
+            Log.d("userEmail", userEmail);
+        } catch (NullPointerException emailError) {
+            Log.d("UserEmailError", emailError.toString());
+        }
 
         ads = db.collection("ads");
         user = db.collection("users");
@@ -97,9 +109,11 @@ public class AdAdvertismentActivity extends AppCompatActivity {
         adAddPriceTextView = findViewById(R.id.adAddPrice);
         adAddUsernameTextview = findViewById(R.id.adAddUsername);
 
+
+
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT < 23)  {
+        /*if (Build.VERSION.SDK_INT < 23)  {
 
             userLocationGeoLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
             getUserLocationGeoLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
@@ -115,7 +129,7 @@ public class AdAdvertismentActivity extends AppCompatActivity {
                 getUserLocationGeoLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
 
             }
-        }
+        }*/
 
 
 
@@ -147,6 +161,7 @@ public class AdAdvertismentActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
 
+                Log.d("UserDocError", e.toString());
             }
         });
 
@@ -220,8 +235,9 @@ public class AdAdvertismentActivity extends AppCompatActivity {
                         createAd.put("lastName", lastName);
                         createAd.put("price", price);
                         createAd.put("userID", userID);
-                        createAd.put("userLat", userLocationGeoLat);
-                        createAd.put("userLon", getUserLocationGeoLon);
+                        createAd.put("userLat", 1.0);
+                        createAd.put("userLon", 1.0);
+                        createAd.put("userEmail", userEmail);
                         //createAd.put("userGeo", userLocationGeo);
 
                         ads.add(createAd);

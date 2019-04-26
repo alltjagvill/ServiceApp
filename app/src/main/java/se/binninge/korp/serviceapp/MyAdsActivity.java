@@ -70,7 +70,8 @@ public class MyAdsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         userID = auth.getUid();
-        userDocRef = userColRef.document(userID);
+        try {
+            userDocRef = userColRef.document(userID);
 
         //Set title
         userDocRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -96,6 +97,9 @@ public class MyAdsActivity extends AppCompatActivity {
 
             }
         });
+        } catch(NullPointerException userIDExeption) {
+            Log.d("USERIDEXEPTION", userIDExeption.toString());
+        }
         //END Set title
 
         myAdsRecyclerView = findViewById(R.id.myAdsRecyclerViewID);
@@ -108,14 +112,16 @@ public class MyAdsActivity extends AppCompatActivity {
 
 
         Query query = myAdsRef.whereEqualTo("userID", userID);
+    try {
+
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
                 myAdsList.clear();
 
-                for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
 
+                for (DocumentSnapshot snapshot : queryDocumentSnapshots) {
 
 
                     Ads ad = snapshot.toObject(Ads.class);
@@ -127,6 +133,9 @@ public class MyAdsActivity extends AppCompatActivity {
                 myAdsAdapter.notifyDataSetChanged();
             }
         });
+    }catch (NullPointerException e){
+    Log.d("NullPointExeptionMyAds", e.toString());
+    }
 
         myAdsAdapter = new AdsAdapter(this, myAdsList);
         myAdsRecyclerView.setAdapter(myAdsAdapter);

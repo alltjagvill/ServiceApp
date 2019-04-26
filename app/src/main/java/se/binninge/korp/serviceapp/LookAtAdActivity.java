@@ -1,6 +1,7 @@
 package se.binninge.korp.serviceapp;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,11 +37,14 @@ public class LookAtAdActivity extends AppCompatActivity {
     private String userID;
     private Double price;
     private String userName;
+    private String userEmail;
+
 
     private TextView titleTV;
     private TextView descriptionTV;
     private TextView userNameTV;
     private TextView priceTV;
+
 
 
     @Override
@@ -69,6 +74,7 @@ public class LookAtAdActivity extends AppCompatActivity {
         userID = ad.getUserID();
         price = ad.getPrice();
         userName = firstName + " " + lastName;
+        userEmail = ad.getUserEmail();
 
         setTitle(getString(R.string.ads) + " - " + userName);
 
@@ -155,5 +161,13 @@ public class LookAtAdActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    public void emailUser(View view) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                "mailto",userEmail, null));
+        intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.default_email_subject) + " " + title);
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.default_email_body_1) +  " " + title + getString(R.string.default_email_body_2));
+        startActivity(Intent.createChooser(intent, getString(R.string.choose_email_client)));
     }
 }

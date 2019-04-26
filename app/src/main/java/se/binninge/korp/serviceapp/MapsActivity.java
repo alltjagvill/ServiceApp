@@ -30,13 +30,17 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -48,7 +52,7 @@ import Model.Ads;
 import Model.User;
 import Utilites.CalcGeoPoints;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private Toolbar toolbar;
@@ -56,13 +60,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private CollectionReference adsRef;
+    private List<Ads> allAdsList;
     private List<Ads> adsList;
+
     private LocationManager locationManager;
     private LocationListener locationListener;
 
     private Double mapUserLat;
     private Double mapUserLon;
     private User user;
+    private String userId;
 
 
 
@@ -78,12 +85,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         adsRef = db.collection("ads");
+        userId = auth.getUid();
 
         toolbar = findViewById(R.id.toolBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.action_maps);
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.nearby_ads));
+
 
 
 
@@ -128,11 +137,60 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
+        allAdsList = new ArrayList<>();
+
+        adsRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    allAdsList.clear();
+
+
+                    for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                        Ads ad = documentSnapshot.toObject(Ads.class);
+                        allAdsList.add(ad);
+                        Log.d("!!!!!AdInAdsList", ad.getTitle());
+                        Log.d("!!!!!allAdsInList 1 length", Integer.toString(allAdsList.size()));
+                    }
+
+                }
+            }
+        });
+
+        /*CalcGeoPoints calcGeoPoints = new CalcGeoPoints();
+
+        Log.d("!!!!!allAdsList Length", Integer.toString(allAdsList.size()));
+        for (Ads ads : allAdsList) {
+            Double adLat = ads.getUserLat();
+            Double adLong = ads.getUserLon();
+            Log.d("!!!!!AdLat", adLat.toString());
+            Log.d("!!!!!AdLon", adLong.toString());
+            Double userLat = user.getLat();
+            Double userLon = user.getLon();
+            Log.d("!!!!!UserLat", userLat.toString());
+            Log.d("!!!!!UserLat", userLon.toString());
+
+
+            float geoCalc = calcGeoPoints.withinDistance(userLat, userLon, adLat, adLong);
+            Log.d("!!!!!GEOCALC", Float.toString(geoCalc));
+
+
+            if (!ads.getUserID().equals(userId) && geoCalc < 100000) {
+                LatLng adLatLng = new LatLng(ads.getUserLat(), ads.getUserLon());
+                Marker m = mMap.addMarker(new MarkerOptions().position(adLatLng).title(ads.getTitle()));
+                m.setTag(ads);
+            }
+        }*/
+
+
+
+        adsList = new ArrayList<>();
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -145,13 +203,47 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 mapUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
                 mapUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
-                Log.d("CURRENTLOCATION", userLatLng.toString());
-               // mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+                CalcGeoPoints calcGeoPoints = new CalcGeoPoints();
+               /* Log.d("!!!!!userLoc", userLatLng.toString());*/
 
-                Log.d("CURRENTLOCATION", userLatLng.toString());
+                Log.d("!!!!!allAdsInList", Integer.toString(allAdsList.size()));
 
-                adsList = new ArrayList<>();
-                adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                for (Ads ads : allAdsList) {
+
+                    Log.d("!!!!!allAdsInListForLoop", Integer.toString(allAdsList.size()));
+
+                    Double adLat = ads.getUserLat();
+                    Double adLong = ads.getUserLon();
+                    /*Log.d("!!!!!AdLat", adLat.toString());
+                    Log.d("!!!!!AdLon", adLong.toString());*/
+                    /*Double userLat = user.getLat();
+                    Double userLon = user.getLon();*/
+
+                    Double userLat = userLatLng.latitude;
+                    Double userLon = userLatLng.longitude;
+                    /*Log.d("!!!!!UserLat", userLat.toString());
+                    Log.d("!!!!!UserLat", userLon.toString());*/
+
+
+                    float geoCalc = calcGeoPoints.withinDistance(userLat, userLon, adLat, adLong);
+                    /*Log.d("!!!!!GEOCALCAd", ads.getTitle());
+                    Log.d("!!!!!GEOCALC", Float.toString(geoCalc));*/
+
+
+                     if ( geoCalc < 100000 && !ads.getUserID().equals(userId)) {
+
+
+                        LatLng adLatLng = new LatLng(ads.getUserLat(), ads.getUserLon());
+                        Marker m = mMap.addMarker(new MarkerOptions().position(adLatLng).title(ads.getTitle()));
+                        m.setTag(ads);
+                        m.setPosition(adLatLng);
+
+                    }
+                }
+
+
+
+                /*adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                         adsList.clear();
@@ -189,7 +281,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                                     LatLng adLatLng = new LatLng(ad.getUserLat(), ad.getUserLon());
-                                    mMap.addMarker(new MarkerOptions().position(adLatLng).title(ad.getTitle()).snippet(Integer.toString(adPosition)));
+                                    Marker m;
+
+
+                                    mMap.addMarker(new MarkerOptions().position(adLatLng).title(ad.getTitle()));
                                     //MarkerOptions marker = new MarkerOptions().position(ad.getUserLat(), ad.getUserLon())
                                     adPosition = adPosition +1;
 
@@ -201,7 +296,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                     }
-                });
+                });*/
 
             }
 
@@ -221,7 +316,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
+        mMap.setOnMarkerClickListener(this);
+
+
+
         //Checking location permission
+
+
 
         if (Build.VERSION.SDK_INT < 23)  {
 
@@ -235,35 +336,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //we have permission
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
 
-
-                Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                /*Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                if (lastKnownLocation != null) {
                 mapUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
                 mapUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
 
-                mMap.clear();
                 // Add a marker for user location
+                mMap.clear();
                 LatLng userLatLng1 = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(userLatLng1).title("You are here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLatLng1.latitude, userLatLng1.longitude), 10));
-                Log.d("Lastknown", userLatLng1.toString());
-             //  mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                Log.d("Lastknown", userLatLng1.toString());
+                }*/
+
 
             }
         }
         //Creating user
-        user = new User(mapUserLat, mapUserLon);
-
-
-
-
-        /*for (int i = 0; i < adsList.size(); i++) {
-
-            Ads newAd = adsList[i];
-
-
-        }
-*/
+      /*  user = new User(0.0, 0.0);*/
 
     }
 
@@ -327,4 +416,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        Ads ads = (Ads) marker.getTag();
+        Intent intent = new Intent(this, LookAtAdActivity.class);
+
+        intent.putExtra("ADOBJECT", ads);
+        //intent.putExtra("CONTEXT", this);
+
+        startActivity(intent);
+
+        /*Toast.makeText(context, ad.getTitle(), Toast.LENGTH_LONG).show();
+
+        Toast.makeText(this, ads.getTitle(), Toast.LENGTH_SHORT).show();*/
+        return false;
+    }
 }

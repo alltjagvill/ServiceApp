@@ -66,6 +66,20 @@ android:orientation="vertical"    >
         android:ems="10"
         android:textStyle="italic"
         android:text="Calle Svensson"/>
+    <Button
+        android:id="@+id/emailUser"
+        android:layout_width="50dp"
+        android:layout_height="60dp"
+
+        android:layout_below="@id/lookAtAdPrice"
+        android:layout_toEndOf="@id/lookAtAdDescription"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="445dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="5dp"
+        android:text="@string/email_user"
+        android:onClick="emailUser"/>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation"

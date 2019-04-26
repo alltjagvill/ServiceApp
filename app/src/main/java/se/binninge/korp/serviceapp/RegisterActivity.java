@@ -94,6 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 userID = auth.getUid();
                 userDoc = usersCollection.document(userID);
+                Log.d("USERCREATE USER", userID);
 
                 userDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -114,6 +115,8 @@ public class RegisterActivity extends AppCompatActivity {
 
 
                                     userDoc.set(user);
+
+
 
                                     goToHomeActivity();
 

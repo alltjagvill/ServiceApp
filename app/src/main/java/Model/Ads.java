@@ -11,6 +11,7 @@ public class Ads implements Serializable {
     private String userID;
     private String firstName;
     private String lastName;
+    private String userEmail;
     private Double price;
     private Double userLat;
     private Double userLon;
@@ -28,14 +29,17 @@ public class Ads implements Serializable {
     public Ads() {
 
     }
-    public Ads(String title, String description, String userID, String firstName, String lastName, Double price, Double userLat, Double userLon) {
+    public Ads(String title, String description, String userID, String firstName, String lastName, String userEmail, Double price, Double userLat, Double userLon) {
         this.title = title;
         this.description = description;
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.userEmail = userEmail;
         this.price = price;
-        this.userLat = userLon;
+        this.userLat = userLat;
+        this.userLon = userLon;
+
      //   this.category = category;
 
     }
@@ -55,6 +59,7 @@ public class Ads implements Serializable {
         return lastName;
     }
     public String getUserID() {return userID;}
+    public String getUserEmail() {return  userEmail;}
     public Double getPrice() { return price;
     }
     public Double getUserLat() { return userLat;

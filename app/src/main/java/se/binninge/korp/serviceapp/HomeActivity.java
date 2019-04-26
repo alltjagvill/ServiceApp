@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Adapter;
 import android.widget.Toast;
 import Adapter.AdsAdapter;
@@ -62,6 +63,7 @@ public class HomeActivity extends AppCompatActivity {
     private String userId;
     private CollectionReference adsRef;
     private List<Ads> adsList;
+    private List<Ads> allAdsList;
     private Toolbar toolbar;
     private BottomNavigationView bottomNavigationView;
 
@@ -121,7 +123,35 @@ public class HomeActivity extends AppCompatActivity {
         // Setting up location listener and updating Geo location
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT < 23)  {
+
+
+        allAdsList = new ArrayList<>();
+        adsList = new ArrayList<>();
+
+        Ads dummyAd = new Ads("Dummy", "Dummy", "Dummy", "Dummy", "Dummy", "Dummy", 1.0, 1.0, 1.0);
+        adsList.add(dummyAd);
+
+        adsRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    allAdsList.clear();
+
+
+                    for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                        Ads ad = documentSnapshot.toObject(Ads.class);
+
+                        allAdsList.add(ad);
+//                        Log.d("!!!!!AdInAdsList", ad.getTitle());
+//                        Log.d("!!!!!allAdsInList 1 length", Integer.toString(allAdsList.size()));
+                    }
+
+                }
+            }
+        });
+
+        /*if (Build.VERSION.SDK_INT < 23)  {
 
             createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
             createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
@@ -133,21 +163,27 @@ public class HomeActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             } else {
                 //we have permission
-                createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
-                createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+                try {
+                    createUserLat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+                    createUserLon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+
+                } catch (NullPointerException e) {
+                    Log.d("!!!!!STACKTRACE", e.toString());
+                }
 
             }
-        }
+        }*/
 
 
         //Creating user
-        user = new User(createUserLat, createUserLon);
+        user = new User(0.0, 0.0);
 
 
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
+                adsList.clear();
                 Log.d("Location", location.toString());
                 final GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
                 userLat = location.getLatitude();
@@ -155,14 +191,63 @@ public class HomeActivity extends AppCompatActivity {
                 userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 user.setLat(userLat);
                 user.setLon(userLong);
-
-                Log.d("UserLocation lat: ", Double.toString(userLat));
-                Log.d("UserLocation long: ", Double.toString(userLong));
+                CalcGeoPoints calcGeoPoints = new CalcGeoPoints();
+                /*Log.d("UserLocation lat: ", Double.toString(userLat));
+                Log.d("UserLocation long: ", Double.toString(userLong));*/
                 //String userLocationString = userLocation.toString();
-                Log.d("Userlocation", userLocation.toString());
+               /* Log.d("Userlocation", userLocation.toString());*/
 
                // Query queryGpsUpdate = adsRef.whereEqualTo("userID", userId);
 
+
+                //Update adslist depending on your location
+                /*adsList = new ArrayList<>();*/
+                for (Ads ads : allAdsList) {
+
+                    Log.d("!!!!!allAdsInListForLoop", Integer.toString(allAdsList.size()));
+
+                    Double adLat = ads.getUserLat();
+                    Double adLong = ads.getUserLon();
+                    Log.d("!!!!!AdLat", adLat.toString());
+                    Log.d("!!!!!AdLon", adLong.toString());
+                    /*Double userLat = user.getLat();
+                    Double userLon = user.getLon();*/
+
+                    Double userLat = userLatLng.latitude;
+                    Double userLon = userLatLng.longitude;
+                    Log.d("!!!!!UserLat", userLat.toString());
+                    Log.d("!!!!!UserLat", userLon.toString());
+
+
+                    float geoCalc = calcGeoPoints.withinDistance(userLat, userLon, adLat, adLong);
+                    /*Log.d("!!!!!GEOCALCAd", ads.getTitle());
+                    Log.d("!!!!!GEOCALC", Float.toString(geoCalc));*/
+
+
+                   try {
+                       if (geoCalc < 100000 && !ads.getUserID().equals(userId)) {
+                           adsList.add(ads);
+                           Log.d("!!!!!AdInadsList", ads.getTitle());
+
+                           /*LatLng adLatLng = new LatLng(ads.getUserLat(), ads.getUserLon());*/
+                        /*Marker m = mMap.addMarker(new MarkerOptions().position(adLatLng).title(ads.getTitle()));
+                        m.setTag(ads);
+                        m.setPosition(adLatLng);*/
+
+                       }
+                   } catch (NullPointerException e) {
+                       Log.d("GAAAAAH", e.toString());
+                   }
+                }
+                if (adsList.size() > 0) {
+                    Log.d("!!!!!AdsInAdslistAfterLoop: ", Integer.toString(adsList.size()));
+                }
+                adapter.notifyDataSetChanged();
+
+                //Update adslist depending on your location
+
+
+                //Update location on your ads
                 adsRef.whereEqualTo("userID", userId).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -185,8 +270,10 @@ public class HomeActivity extends AppCompatActivity {
                         }
                         }
                 });
+
+                //Update location on your ads
             }
-            // Setting up location listener and updating Geo location
+
 
 
             @Override
@@ -205,9 +292,12 @@ public class HomeActivity extends AppCompatActivity {
             }
         };
 
+        adapter = new AdsAdapter(this, adsList);
+        adsRecyclerView.setAdapter(adapter);
 
 
-        adsList = new ArrayList<>();
+
+        /*adsList = new ArrayList<>();
         adsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -224,17 +314,17 @@ public class HomeActivity extends AppCompatActivity {
                         Double userLat = user.getLat();
                         Double userLon = user.getLon();
 
-                        Log.d("!!!!!TheAd", ad.getTitle());
-                        Log.d("!!!!!AdName", ad.getFirstName() + " " + ad.getLastName());
-                        Log.d("!!!!!adLocation lat", Double.toString(adLat));
-                        Log.d("!!!!!adLocation long", Double.toString(adLong));
-                        Log.d("!!!!!userLocation lat", user.getLat().toString());
-                        Log.d("!!!!!userLocation long", user.getLon().toString());
+                        Log.d("!!!TheAd", ad.getTitle());
+                        Log.d("!!!AdName", ad.getFirstName() + " " + ad.getLastName());
+                        Log.d("!!!adLocation lat", Double.toString(adLat));
+                        Log.d("!!!adLocation long", Double.toString(adLong));
+                        Log.d("!!!userLocation lat", user.getLat().toString());
+                        Log.d("!!!userLocation long", user.getLon().toString());
 
 
 
                     float geoCalc = calcGeoPoints.withinDistance(userLat, userLon, adLat, adLong);
-                    Log.d("!!!!!GEOCALC", Float.toString(geoCalc));
+                    Log.d("!!!GEOCALC", Float.toString(geoCalc));
 
 
                         //Log.d("geoLocation", Double.toString(ad.getUserGeo().getLatitude()));
@@ -251,9 +341,8 @@ public class HomeActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+*/
 
-        adapter = new AdsAdapter(this, adsList);
-        adsRecyclerView.setAdapter(adapter);
 
 
 
@@ -334,7 +423,7 @@ public class HomeActivity extends AppCompatActivity {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, locationListener);
 
             }
         }
@@ -370,6 +459,28 @@ public class HomeActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    public void updateAds(View view) {
+        adsRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    allAdsList.clear();
+
+
+                    for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                        Ads ad = documentSnapshot.toObject(Ads.class);
+
+                        allAdsList.add(ad);
+//                        Log.d("!!!!!AdInAdsList", ad.getTitle());
+//                        Log.d("!!!!!allAdsInList 1 length", Integer.toString(allAdsList.size()));
+                    }
+
+                }
+            }
+        });
     }
 
     public boolean onTouchEvent(MotionEvent touchevent) {
